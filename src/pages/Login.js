@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BrowserProvider, Contract } from "ethers";
+import axios from 'axios';
 
 
 
@@ -52,7 +53,7 @@ const contractABI = [
 const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
 
 function Login() {
-    const [account, setAccount] = useState(sessionStorage.getItem("walletAddress") || "");
+    const [account, setAccount] = useState(localStorage.getItem("walletAddress") || "");
 
 
 
@@ -64,11 +65,36 @@ function Login() {
                 const provider = new BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
                 const contractInstance = new Contract(contractAddress, contractABI, signer);
+
+                await window.ethereum.request({
+                    method: "wallet_requestPermissions",
+                    params: [{ eth_accounts: {} }],
+                });
+
                 const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-                sessionStorage.setItem("walletAddress", accounts[0]);
+                const walletAddress = accounts[0];
+                const nonce = Math.random().toString(36).substring(2); // Nonce acak
+                const message = `Sign to login to MyDapp at ${new Date().toISOString()} with nonce: ${nonce}`;
+
+                const signature = await signer.signMessage(message);
+
+                const response = await axios.post("http://localhost:5000/api/account/login", {
+                    walletAddress,
+                    message,
+                    signature
+                });
+
+                if (response.status !== 200) {
+                    throw new Error("Login failed");
+                }
+
+                // // Simpan alamat dan token
+                localStorage.setItem("walletAddress", walletAddress);
+                localStorage.setItem("token", response.data.data.token);
+
                 navigate("/dashboard");
             } catch (error) {
-                console.error("Error connecting to MetaMask", error);
+                console.error(error);
             }
         } else {
             alert("MetaMask not detected. Please install MetaMask.");
@@ -81,13 +107,11 @@ function Login() {
             setAccount(null);
 
             // Hapus sessionStorage
-            sessionStorage.removeItem("walletAddress");
+            localStorage.removeItem("walletAddress");
+            localStorage.removeItem("token");
 
             // Minta Metamask untuk mencabut izin akun (agar pop-up muncul saat connect lagi)
-            await window.ethereum.request({
-                method: "wallet_requestPermissions",
-                params: [{ eth_accounts: {} }],
-            });
+
 
             alert("Wallet disconnected! Connect again to use the app.");
         } catch (error) {

@@ -8,11 +8,13 @@ import {
   Route
 } from 'react-router-dom';
 // All pages
-
-
-
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import Root from './pages/Root';
+import IssueCertificate from './pages/IssueCertificate';
+import Submit from './pages/Submit';
+
+
 
 function App() {
   useEffect(() => {
@@ -35,8 +37,19 @@ function App() {
       <Router>
 
         <Routes>
-          <Route path='/dashboard' element={<Dashboard />} />
+
           <Route path="/login" element={<Login />} />
+          <Route path="/" element={<Root />}>
+
+            <Route path="/dashboard" index element={<Dashboard />} />
+            <Route path="certificates" />
+            <Route path="issue-certificate" element={<IssueCertificate />} />
+            <Route path="issue-certificate/submit" element={<Submit />} />
+            <Route path="upload-template" />
+            <Route path="verify-certificate" />
+            <Route path="activity-log" />
+            <Route path="settings" />
+          </Route>
 
         </Routes>
 
