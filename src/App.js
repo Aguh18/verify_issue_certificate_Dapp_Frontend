@@ -14,6 +14,7 @@ import Root from './pages/Root';
 import IssueCertificate from './pages/IssueCertificate';
 import Submit from './pages/Submit';
 import VerifyCertificate from './pages/VerifyCertificate';
+import UploadCert from './pages/UploadCert';
 
 
 
@@ -46,7 +47,8 @@ function App() {
             <Route path="certificates" />
             <Route path="issue-certificate" element={<IssueCertificate />} />
             <Route path="issue-certificate/submit" element={<Submit />} />
-            <Route path="upload-template" />
+            <Route path="template" element={<UploadCert />} />
+            <Route path="upload-template" element={<UploadCert />} />
             <Route path="verify-certificate" element={<VerifyCertificate />} />
             <Route path="activity-log" />
             <Route path="settings" />

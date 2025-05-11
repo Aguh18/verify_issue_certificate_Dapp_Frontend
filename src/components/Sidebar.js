@@ -26,7 +26,7 @@ function Sidebar() {
             />
             <SidebarButton
                 props={{
-                    text: 'Unggah Template',
+                    text: 'Template',
                     icon: 'upload',
                     link: '/upload-template',
                 }}

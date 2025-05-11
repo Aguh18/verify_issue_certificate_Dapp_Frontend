@@ -1,25 +1,19 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { BrowserProvider, Contract, isAddress } from 'ethers';
+import contractABI from '../ABI.json'; 
 
-// ABI dari smart contract CertificateRegistry
-const contractABI = [
-    'function issueCertificate(string _id, string _certificateTitle, string _expiryDate, string _issueDate, string _issuerName, string _recipientName, address _targetAddress) external returns (string)',
-    'event CertificateIssued(string indexed id, address indexed issuerAddress, address indexed targetAddress, string recipientName, string issueDate)',
-];
-
-// Alamat smart contract dan network configuration
-const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3'; // Ganti dengan alamat kontrak yang sudah di-deploy
+const contractAddress = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512';
 const networkConfig = {
-    chainId: '0x7a69', // Hardhat local (31337). Ganti dengan chain ID testnet/mainnet (e.g., Sepolia: 0xaa36a7)
+    chainId: '0x7a69',
     chainName: 'Hardhat Local',
-    rpcUrls: ['http://127.0.0.1:8545/'], // RPC untuk Hardhat. Ganti untuk testnet/mainnet
+    rpcUrls: ['http://127.0.0.1:8545/'],
     nativeCurrency: {
         name: 'Ether',
         symbol: 'ETH',
         decimals: 18,
     },
-    blockExplorerUrls: [], // Kosong untuk Hardhat local
+    blockExplorerUrls: [],
 };
 
 const Submit = () => {
@@ -72,7 +66,11 @@ const Submit = () => {
                 }
 
                 await window.ethereum.request({ method: 'eth_requestAccounts' });
-                const web3Provider = new BrowserProvider(window.ethereum);
+                const web3Provider = new BrowserProvider(window.ethereum, {
+                    chainId: 31337,
+                    name: 'hardhat',
+                    ensAddress: null, // Nonaktifkan ENS
+                });
                 const signer = await web3Provider.getSigner();
                 const contractInstance = new Contract(contractAddress, contractABI, signer);
 
@@ -99,6 +97,7 @@ const Submit = () => {
     }
 
     const data = state.data;
+    console.log('Data from state:', data);
 
     const fileCid =
         data.fileCid ||
@@ -109,9 +108,11 @@ const Submit = () => {
         certificateTitle: data.certificateTitle || 'Certificate of Achievement',
         expiryDate: data.expiryDate || '',
         issueDate: data.issueDate || '2025-05-16',
+        cid: data.fileCid || 'QmT5NvUtoM5nXy6v7e4f3g3g3g3g3g3g3g3g3g3g3g3g3g', // Ganti dengan CID valid
         issuerName: data.issuerName || 'Universitas XYZ',
         recipientName: data.recipientName || 'Recipient Name',
         targetAddress: data.targetAddress || '0xFde6f7aC02514dDa4B3bB7C135EB0A39C90243A4',
+
     };
 
     const handleIssueCertificate = async () => {
@@ -129,15 +130,20 @@ const Submit = () => {
                 throw new Error('Required fields (ID, title, recipient name) cannot be empty');
             }
 
-            if (!isAddress(certificateData.targetAddress)) {
-                throw new Error('Invalid target address');
+            if (!isAddress(certificateData.targetAddress) || certificateData.targetAddress.includes('.eth')) {
+                throw new Error('Invalid target address: ENS not supported on Hardhat Network');
             }
+
+
+
+            console.log('Issuing certificate with data:', certificateData);
 
             const tx = await contract.issueCertificate(
                 certificateData.id,
                 certificateData.certificateTitle,
                 certificateData.expiryDate,
                 certificateData.issueDate,
+                certificateData.cid, // Pindah ke posisi kelima sesuai ABI
                 certificateData.issuerName,
                 certificateData.recipientName,
                 certificateData.targetAddress
@@ -161,7 +167,11 @@ const Submit = () => {
 
             setTransactionStatus(`Certificate issued successfully with ID: ${issuedId}`);
         } catch (err) {
-            setError(`Failed to issue certificate: ${err.message}`);
+            if (err.code === 'UNSUPPORTED_OPERATION' && err.operation === 'getEnsAddress') {
+                setError('ENS not supported on Hardhat Network. Please use a valid Ethereum address.');
+            } else {
+                setError(`Failed to issue certificate: ${err.message}`);
+            }
             setTransactionStatus('');
         }
     };

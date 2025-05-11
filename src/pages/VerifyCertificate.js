@@ -1,13 +1,10 @@
 
 import { useState, useEffect } from 'react';
 import { BrowserProvider, Contract } from 'ethers';
+import contractABI from '../ABI.json';
 
-const contractABI = [
-  'function verifyCertificate(string _id) external view returns (bool)',
-  'function getCertificate(string _id) external view returns (tuple(string id, string certificateTitle, string expiryDate, string issueDate, address issuerAddress, string issuerName, string recipientName, address targetAddress, bool isValid))',
-];
 
-const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+const contractAddress = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512';
 const networkConfig = {
   chainId: '0x7a69',
   chainName: 'Hardhat Local',
@@ -82,13 +79,14 @@ const VerifyCertificate = () => {
         setCertificateData({
           id: certData[0],
           certificateTitle: certData[1],
-          expiryDate: certData[2],
-          issueDate: certData[3],
-          issuerAddress: certData[4],
-          issuerName: certData[5],
-          recipientName: certData[6],
-          targetAddress: certData[7],
-          isValid: certData[8],
+          cid: certData[2],
+          expiryDate: certData[3],
+          issueDate: certData[4],
+          issuerAddress: certData[5],
+          issuerName: certData[6],
+          recipientName: certData[7],
+          targetAddress: certData[8],
+          isValid: certData[9],
         });
       } else {
         setError('Certificate is invalid or does not exist.');
@@ -143,6 +141,13 @@ const VerifyCertificate = () => {
           </pre>
         </div>
       )}
+
+      <h2>Certificate PDF</h2>
+      <iframe
+        src={certificateData?.cid}
+        title="Certificate PDF"
+        style={{ width: '100%', height: '80vh', border: 'none' }}
+      />
     </div>
   );
 };
