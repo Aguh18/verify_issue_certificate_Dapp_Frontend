@@ -4,11 +4,12 @@ import Draggable from 'react-draggable';
 
 const UploadCert = () => {
     const [template, setTemplate] = useState(null);
-    const [name, setName] = useState('');
+    const [name, setName] = useState('Name');
     const [namePosition, setNamePosition] = useState({ x: 50, y: 50 });
     const [activeField, setActiveField] = useState(null);
     const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
-    const [maxDimension, setMaxDimension] = useState(1200); // Default max dimension for resizing
+    const [maxDimension, setMaxDimension] = useState(1200);
+    const [certificacteName, setCertificateName] = useState('');
 
     const previewRef = useRef(null);
 
@@ -68,6 +69,7 @@ const UploadCert = () => {
         if (field === 'name') {
             setNamePosition({ x, y });
         }
+        console.log('Drag position:', { x, y }); // Debug
     };
 
     const downloadCertificate = () => {
@@ -112,6 +114,18 @@ const UploadCert = () => {
                 </div>
 
                 <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700">Masukan Nama Sertifikat</label>
+                    <input
+                        type="text"
+                        onChange={(e) => setCertificateName(Number(e.target.value))}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+                        placeholder="Masukkan Nama Sertifikat"
+                        min="100"
+                        max="5000"
+                    />
+                </div>
+
+                <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700">Ukuran Maksimum (px)</label>
                     <input
                         type="number"
@@ -124,7 +138,7 @@ const UploadCert = () => {
                     />
                 </div>
 
-                <div className="grid grid-cols-1 gap-4 mb-4">
+                {/* <div className="grid grid-cols-1 gap-4 mb-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Nama Peserta</label>
                         <input
@@ -135,7 +149,7 @@ const UploadCert = () => {
                             placeholder="Masukkan nama peserta"
                         />
                     </div>
-                </div>
+                </div> */}
 
                 <div className="mb-4 flex gap-2">
                     <button
@@ -176,8 +190,8 @@ const UploadCert = () => {
                                             y: (namePosition.y / 100) * (previewRef.current?.offsetHeight || 0) - ((previewRef.current?.offsetHeight || 0) / 2),
                                         }}
                                     >
-                                        <div className="absolute cursor-move" style={{ transform: 'translate(-50%, -50%)' }}>
-                                            <p className="text-2xl font-bold text-black bg-white bg-opacity-50 px-2">
+                                        <div className="absolute cursor-move flex justify-center items-center" style={{ transform: 'translate(-50%, -50%)' }}>
+                                            <p className="text-2xl font-bold text-black bg-white bg-opacity-50 px-2 text-center">
                                                 {name || 'Nama Peserta'}
                                             </p>
                                         </div>
