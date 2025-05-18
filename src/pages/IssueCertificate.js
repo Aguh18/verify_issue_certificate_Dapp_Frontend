@@ -1,7 +1,9 @@
 import { data } from 'autoprefixer';
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { getEnv } from '../utils/env';
 import { useNavigate } from 'react-router-dom';
+
 
 const IssueCertificate = () => {
     const [formData, setFormData] = useState({
@@ -18,8 +20,44 @@ const IssueCertificate = () => {
         targetAddress: '',
 
     });
+    const [templateName, setTemplateName] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+
     const [errors, setErrors] = useState({});
     const navigate = useNavigate();
+
+
+    useEffect(() => {
+        const fetchTemplates = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await axios.get(
+                    `${getEnv('BASE_URL')}/api/certificate/template`,
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
+
+                console.log('Full response:', response.data);
+
+                // Jika response.data = { data: { templates: [...] } }
+                setTemplateName(response.data.data.templates);
+            } catch (error) {
+                console.error('Error fetching templates:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTemplates();
+    }, []);
+
+
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -62,7 +100,7 @@ const IssueCertificate = () => {
             return;
         }
         try {
-            // Kirim request POST dengan Axios
+            
             const response = await axios.post('http://localhost:5000/api/certificate/generate', formData, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem("token")}`,
@@ -103,6 +141,7 @@ const IssueCertificate = () => {
                 {errors.submit && (
                     <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">{errors.submit}</div>
                 )}
+                {/* {templateName[0].id} */}
                 <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700">Template Sertifikat</label>
                     <select
@@ -113,9 +152,11 @@ const IssueCertificate = () => {
                         required
                     >
                         <option value="">Pilih Template</option>
-                        <option value="kursus">Kursus Pemrograman</option>
-                        <option value="seminar">Seminar Bisnis</option>
-                        <option value="pelatihan">Pelatihan Keamanan</option>
+                        {templateName.map((template) => (
+                            <option key={template.id} value={template.id}>
+                                {template.name}
+                            </option>
+                        ))}
                     </select>
                     {errors.template && <p className="text-red-500 text-sm mt-1">{errors.template}</p>}
                 </div>

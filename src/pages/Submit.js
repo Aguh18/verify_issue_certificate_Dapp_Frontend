@@ -27,6 +27,7 @@ const Submit = () => {
 
     const state = location.state;
 
+
     // Inisialisasi ethers.js dengan MetaMask
     useEffect(() => {
         const initEthers = async () => {
@@ -85,7 +86,7 @@ const Submit = () => {
         initEthers();
     }, []);
 
-    // Handle redirect jika state atau state.data tidak ada
+
     useEffect(() => {
         if (!state || !state.data) {
             navigate('/issue-certificate', { replace: true });
@@ -174,7 +175,11 @@ const Submit = () => {
             }
             setTransactionStatus('');
         }
+
+
     };
+
+
 
     return (
         <div style={{ padding: '20px' }}>

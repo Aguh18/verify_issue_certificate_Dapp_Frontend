@@ -10,6 +10,7 @@ const UploadCert = () => {
     const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
     const [maxDimension, setMaxDimension] = useState(1200);
     const [certificacteName, setCertificateName] = useState('');
+    const [templateName, setTemplateName] = useState('');
 
     const previewRef = useRef(null);
 
