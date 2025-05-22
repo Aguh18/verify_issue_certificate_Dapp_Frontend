@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
-import { BrowserProvider, Contract } from 'ethers';
+import { BrowserProvider, Contract, keccak256 } from 'ethers';
+import { ethers } from 'ethers';
 import contractABI from '../ABI.json';
 
 
@@ -98,9 +99,41 @@ const VerifyCertificate = () => {
     }
   };
 
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          const arrayBuffer = event.target.result;
+          const uint8Array = new Uint8Array(arrayBuffer);
+          const hashHex = keccak256(uint8Array);
+          setCertificateId(hashHex);
+          console.log('Keccak256 Hash:', hashHex);
+        } catch (error) {
+          console.error('Error computing hash:', error);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+  };
+
   return (
     <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
       <h1>Verify Certificate</h1>
+      <div>
+
+        <div>
+          <input
+            type="file"
+            accept=".pdf"
+            onChange={handleFileChange}
+            style={{ marginBottom: '20px' }}
+          />
+
+        </div>
+      </div>
       <div style={{ marginBottom: '20px' }}>
         <input
           type="text"
